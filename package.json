@@ -1,0 +1,38 @@
+{
+  "name": "bee-property-service-api",
+  "version": "1.0.0",
+  "description": "BEE Property Service & Access API - Fast, modular backend for Residence, RWA, Agency, Technician, and Security applications.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node scripts/seed.js",
+    "import:all": "node scripts/import-all-bee-data.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "express",
+    "mongodb",
+    "mongoose",
+    "property-management",
+    "gate-pass",
+    "service-request",
+    "api"
+  ],
+  "author": "BEE Engineering Team",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.2.3",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0",
+    "zod": "^4.3.6"
+  }
+}
+

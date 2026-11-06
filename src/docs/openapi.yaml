@@ -1,0 +1,338 @@
+openapi: 3.0.3
+info:
+  title: BEE Property Service & Access API
+  version: 1.0.0
+  description: High-performance, modular backend API for BEE Residence, RWA, Agency, Technician, and Security applications.
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local development server
+paths:
+  /auth/login:
+    post:
+      summary: User Login
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: admin@beeproperty.com
+                password:
+                  type: string
+                  example: admin123
+      responses:
+        200:
+          description: Login successful, returns JWT access and refresh tokens.
+
+  /auth/refresh:
+    post:
+      summary: Refresh Access Token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        200:
+          description: Token refreshed successfully.
+
+  /auth/me:
+    get:
+      summary: Get Current User Profile
+      tags: [Authentication]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User profile details.
+
+  /integrations/residence/service-requests:
+    post:
+      summary: Residence Service Request Intake
+      tags: [Integrations]
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sourceRequestId, householdId, requesterId, category, title, description]
+              properties:
+                sourceRequestId:
+                  type: string
+                  example: TKT-2026-819
+                householdId:
+                  type: string
+                  example: HH-BLR-1204
+                requesterId:
+                  type: string
+                  example: USR-001
+                category:
+                  type: string
+                  example: Plumbing
+                title:
+                  type: string
+                  example: Kitchen sink pipe dripping
+                description:
+                  type: string
+                  example: Slow leak at the U-joint pipe
+                urgency:
+                  type: string
+                  example: High
+      responses:
+        201:
+          description: Service request accepted and recorded.
+
+  /integrations/rwa/complaints:
+    post:
+      summary: RWA Complaint Intake
+      tags: [Integrations]
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sourceRequestId, category, title, description]
+              properties:
+                sourceRequestId:
+                  type: string
+                  example: CMP-2026-092
+                category:
+                  type: string
+                  example: Civil & Structural
+                title:
+                  type: string
+                  example: Pool deck tiles cracked
+                description:
+                  type: string
+                  example: Border tiles near splash pool have cracked
+                priority:
+                  type: string
+                  example: Urgent
+                requiresApproval:
+                  type: boolean
+                  example: true
+      responses:
+        201:
+          description: Complaint accepted into workflow.
+
+  /agency/service-requests:
+    get:
+      summary: List Service Requests (Agency Queue)
+      tags: [Agency]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: List of service requests with pagination metadata.
+
+  /agency/service-requests/{id}/dispatch:
+    post:
+      summary: Dispatch Service Request to Technicians
+      tags: [Agency]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [assignments]
+              properties:
+                instructions:
+                  type: string
+                  example: Inspect and repair kitchen pipeline
+                createTechnicianGatePass:
+                  type: boolean
+                  example: true
+                assignments:
+                  type: array
+                  items:
+                    type: object
+                    required: [technicianId, role]
+                    properties:
+                      technicianId:
+                        type: string
+                        example: TECH-002
+                      technicianName:
+                        type: string
+                        example: Vikram Sharma
+                      role:
+                        type: string
+                        example: PLUMBER
+      responses:
+        201:
+          description: Work order created and dispatched.
+
+  /technician/jobs:
+    get:
+      summary: List Jobs Assigned to Authenticated Technician
+      tags: [Technician]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: List of assigned work order assignments.
+
+  /technician/jobs/{jobId}/check-in:
+    post:
+      summary: Technician Job Check-in
+      tags: [Technician]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Job started successfully.
+
+  /technician/jobs/{jobId}/complete:
+    post:
+      summary: Complete Technician Job
+      tags: [Technician]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                completionNote:
+                  type: string
+                  example: Fixed U-joint leak and replaced rubber gasket.
+      responses:
+        200:
+          description: Job marked as complete.
+
+  /gate-passes/requests:
+    post:
+      summary: Request Gate Pass
+      tags: [Gate Pass]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requestType, propertyId, visitor, validUntil]
+              properties:
+                requestType:
+                  type: string
+                  enum: [RESIDENT_GUEST, DELIVERY, CONTRACTOR, TECHNICIAN_WORK_ORDER]
+                propertyId:
+                  type: string
+                  example: PROP-01
+                validUntil:
+                  type: string
+                  format: date-time
+                visitor:
+                  type: object
+                  required: [name]
+                  properties:
+                    name:
+                      type: string
+                    phone:
+                      type: string
+                    purpose:
+                      type: string
+      responses:
+        201:
+          description: Gate pass request created.
+
+  /security/gate-passes/verify:
+    post:
+      summary: Verify Gate Pass QR or OTP
+      tags: [Security]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                otp:
+                  type: string
+      responses:
+        200:
+          description: Verification decision (ALLOW or DENY).
+
+  /health/ready:
+    get:
+      summary: Readiness Check
+      tags: [System]
+      responses:
+        200:
+          description: Service and database are healthy.
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
