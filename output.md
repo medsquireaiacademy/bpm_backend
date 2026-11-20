@@ -803,3 +803,156 @@
 | **Security** | `/api/v1/security/gate-passes/verify` | `POST` | **4 - 6 ms** |
 | **Security** | `/api/v1/security/gate-passes/:id/check-in` | `POST` | **6 - 8 ms** |
 
+
+
+---
+
+## 4. Live Production API Endpoints (Render Deployment)
+
+- **Production Base URL**: `https://bpm-backend-80wo.onrender.com`
+- **API Version 1 Base**: `https://bpm-backend-80wo.onrender.com/api/v1`
+- **Interactive Swagger Documentation**: [https://bpm-backend-80wo.onrender.com/docs](https://bpm-backend-80wo.onrender.com/docs)
+- **API v1 Swagger Documentation**: [https://bpm-backend-80wo.onrender.com/api/v1/docs](https://bpm-backend-80wo.onrender.com/api/v1/docs)
+
+---
+
+### 4.1 System & Documentation Endpoints
+
+| Method | Endpoint | Live Production URL | Authentication / Access | Description |
+|---|---|---|---|---|
+| `GET` | `/` | [https://bpm-backend-80wo.onrender.com/](https://bpm-backend-80wo.onrender.com/) | Public | API Root status, metadata, and doc links |
+| `GET` | `/docs` | [https://bpm-backend-80wo.onrender.com/docs](https://bpm-backend-80wo.onrender.com/docs) | Public | Interactive Swagger / OpenAPI UI |
+| `GET` | `/api/v1/docs` | [https://bpm-backend-80wo.onrender.com/api/v1/docs](https://bpm-backend-80wo.onrender.com/api/v1/docs) | Public | Interactive Swagger UI (V1 path) |
+| `GET` | `/health/live` | [https://bpm-backend-80wo.onrender.com/health/live](https://bpm-backend-80wo.onrender.com/health/live) | Public | Liveness probe (Process status) |
+| `GET` | `/health/ready` | [https://bpm-backend-80wo.onrender.com/health/ready](https://bpm-backend-80wo.onrender.com/health/ready) | Public | Readiness probe (Database & service state) |
+| `GET` | `/api/v1/health/live` | [https://bpm-backend-80wo.onrender.com/api/v1/health/live](https://bpm-backend-80wo.onrender.com/api/v1/health/live) | Public | V1 Liveness probe |
+| `GET` | `/api/v1/health/ready` | [https://bpm-backend-80wo.onrender.com/api/v1/health/ready](https://bpm-backend-80wo.onrender.com/api/v1/health/ready) | Public | V1 Readiness probe |
+| `POST` | `/api/v1/uploads/presign` | [https://bpm-backend-80wo.onrender.com/api/v1/uploads/presign](https://bpm-backend-80wo.onrender.com/api/v1/uploads/presign) | Public | Generate presigned media upload URL |
+
+---
+
+### 4.2 Authentication & User Profile (`/api/v1/auth`)
+
+| Method | Endpoint | Live Production URL | Headers / Auth | Description |
+|---|---|---|---|---|
+| `POST` | `/api/v1/auth/login` | [https://bpm-backend-80wo.onrender.com/api/v1/auth/login](https://bpm-backend-80wo.onrender.com/api/v1/auth/login) | Public (Rate-limited) | User login, returns JWT access & refresh tokens |
+| `POST` | `/api/v1/auth/refresh` | [https://bpm-backend-80wo.onrender.com/api/v1/auth/refresh](https://bpm-backend-80wo.onrender.com/api/v1/auth/refresh) | Public (Rate-limited) | Refresh expired access token |
+| `POST` | `/api/v1/auth/logout` | [https://bpm-backend-80wo.onrender.com/api/v1/auth/logout](https://bpm-backend-80wo.onrender.com/api/v1/auth/logout) | `Authorization: Bearer <token>` | User logout and session invalidation |
+| `GET` | `/api/v1/auth/me` | [https://bpm-backend-80wo.onrender.com/api/v1/auth/me](https://bpm-backend-80wo.onrender.com/api/v1/auth/me) | `Authorization: Bearer <token>` | Get profile of currently logged-in user |
+
+---
+
+### 4.3 External Application Integrations (`/api/v1/integrations`)
+
+| Method | Endpoint | Live Production URL | Headers / Auth | Description |
+|---|---|---|---|---|
+| `POST` | `/api/v1/integrations/residence/service-requests` | [https://bpm-backend-80wo.onrender.com/api/v1/integrations/residence/service-requests](https://bpm-backend-80wo.onrender.com/api/v1/integrations/residence/service-requests) | `x-client-id: residence-api-client`<br>`Idempotency-Key` | Residence App: Ingest service request |
+| `GET` | `/api/v1/integrations/residence/service-requests/:sourceRequestId` | [https://bpm-backend-80wo.onrender.com/api/v1/integrations/residence/service-requests/:sourceRequestId](https://bpm-backend-80wo.onrender.com/api/v1/integrations/residence/service-requests/:sourceRequestId) | `x-client-id: residence-api-client` | Residence App: Query request status by source ID |
+| `POST` | `/api/v1/integrations/residence/gate-pass-requests` | [https://bpm-backend-80wo.onrender.com/api/v1/integrations/residence/gate-pass-requests](https://bpm-backend-80wo.onrender.com/api/v1/integrations/residence/gate-pass-requests) | `x-client-id: residence-api-client`<br>`Idempotency-Key` | Residence App: Submit gate pass request |
+| `POST` | `/api/v1/integrations/rwa/complaints` | [https://bpm-backend-80wo.onrender.com/api/v1/integrations/rwa/complaints](https://bpm-backend-80wo.onrender.com/api/v1/integrations/rwa/complaints) | `x-client-id: rwa-api-client`<br>`Idempotency-Key` | RWA App: Ingest community complaint |
+| `GET` | `/api/v1/integrations/rwa/complaints/:sourceRequestId` | [https://bpm-backend-80wo.onrender.com/api/v1/integrations/rwa/complaints/:sourceRequestId](https://bpm-backend-80wo.onrender.com/api/v1/integrations/rwa/complaints/:sourceRequestId) | `x-client-id: rwa-api-client` | RWA App: Query complaint status |
+| `POST` | `/api/v1/integrations/security/access-requests` | [https://bpm-backend-80wo.onrender.com/api/v1/integrations/security/access-requests](https://bpm-backend-80wo.onrender.com/api/v1/integrations/security/access-requests) | `x-client-id: security-api-client`<br>`Idempotency-Key` | Security App: Guard registers unannounced visitor arrival |
+
+---
+
+### 4.4 Service Requests (`/api/v1/service-requests`)
+
+| Method | Endpoint | Live Production URL | Roles Allowed | Description |
+|---|---|---|---|---|
+| `GET` | `/api/v1/service-requests` | [https://bpm-backend-80wo.onrender.com/api/v1/service-requests](https://bpm-backend-80wo.onrender.com/api/v1/service-requests) | Authenticated | List all service requests (with filters & pagination) |
+| `GET` | `/api/v1/service-requests/:id` | [https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id](https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id) | Authenticated | Get service request details by ID |
+| `POST` | `/api/v1/service-requests/:id/approve` | [https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/approve](https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/approve) | `RWA_PRESIDENT`, `RWA_VICE_PRESIDENT`, `AGENCY_ADMIN` | Approve a pending service request |
+| `POST` | `/api/v1/service-requests/:id/reject` | [https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/reject](https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/reject) | `RWA_PRESIDENT`, `RWA_VICE_PRESIDENT`, `AGENCY_ADMIN` | Reject a service request |
+| `POST` | `/api/v1/service-requests/:id/hold` | [https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/hold](https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/hold) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Place a service request on hold |
+| `POST` | `/api/v1/service-requests/:id/resume` | [https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/resume](https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/resume) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Resume a held service request |
+| `POST` | `/api/v1/service-requests/:id/resolve` | [https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/resolve](https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/resolve) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Mark service request resolved |
+| `POST` | `/api/v1/service-requests/:id/close` | [https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/close](https://bpm-backend-80wo.onrender.com/api/v1/service-requests/:id/close) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR`, `RWA_PRESIDENT` | Finalize and close service request |
+
+---
+
+### 4.5 Agency Operations & Dispatch Queue (`/api/v1/agency`)
+
+| Method | Endpoint | Live Production URL | Roles Allowed | Description |
+|---|---|---|---|---|
+| `GET` | `/api/v1/agency/service-requests` | [https://bpm-backend-80wo.onrender.com/api/v1/agency/service-requests](https://bpm-backend-80wo.onrender.com/api/v1/agency/service-requests) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Get agency triage queue |
+| `GET` | `/api/v1/agency/service-requests/:id` | [https://bpm-backend-80wo.onrender.com/api/v1/agency/service-requests/:id](https://bpm-backend-80wo.onrender.com/api/v1/agency/service-requests/:id) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Get service request details for dispatch |
+| `POST` | `/api/v1/agency/service-requests/:id/dispatch` | [https://bpm-backend-80wo.onrender.com/api/v1/agency/service-requests/:id/dispatch](https://bpm-backend-80wo.onrender.com/api/v1/agency/service-requests/:id/dispatch) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR`<br>`Idempotency-Key` | Dispatch work order & assign technicians |
+| `GET` | `/api/v1/agency/technicians` | [https://bpm-backend-80wo.onrender.com/api/v1/agency/technicians](https://bpm-backend-80wo.onrender.com/api/v1/agency/technicians) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | List roster of technicians |
+
+---
+
+### 4.6 Work Orders (`/api/v1/work-orders`)
+
+| Method | Endpoint | Live Production URL | Roles Allowed | Description |
+|---|---|---|---|---|
+| `GET` | `/api/v1/work-orders` | [https://bpm-backend-80wo.onrender.com/api/v1/work-orders](https://bpm-backend-80wo.onrender.com/api/v1/work-orders) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR`, `RWA_PRESIDENT` | List work orders with filter & pagination |
+| `GET` | `/api/v1/work-orders/:id` | [https://bpm-backend-80wo.onrender.com/api/v1/work-orders/:id](https://bpm-backend-80wo.onrender.com/api/v1/work-orders/:id) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR`, `RWA_PRESIDENT` | Get work order details |
+| `POST` | `/api/v1/work-orders/:id/assignments` | [https://bpm-backend-80wo.onrender.com/api/v1/work-orders/:id/assignments](https://bpm-backend-80wo.onrender.com/api/v1/work-orders/:id/assignments) | `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Assign or add technician to work order |
+
+---
+
+### 4.7 Technician Field Execution (`/api/v1/technician`)
+
+| Method | Endpoint | Live Production URL | Roles Allowed | Description |
+|---|---|---|---|---|
+| `GET` | `/api/v1/technician/jobs` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | List jobs assigned to technician |
+| `GET` | `/api/v1/technician/jobs/:jobId` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Get technician job details |
+| `POST` | `/api/v1/technician/jobs/:jobId/check-in` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/check-in](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/check-in) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Technician on-site check-in / start work |
+| `POST` | `/api/v1/technician/jobs/:jobId/notes` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/notes](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/notes) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Append progress notes to job |
+| `POST` | `/api/v1/technician/jobs/:jobId/attachments` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/attachments](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/attachments) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Attach photo proof / documents |
+| `POST` | `/api/v1/technician/jobs/:jobId/hold` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/hold](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/hold) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Place technician job on hold (e.g., waiting for parts) |
+| `POST` | `/api/v1/technician/jobs/:jobId/resume` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/resume](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/resume) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Resume job execution |
+| `POST` | `/api/v1/technician/jobs/:jobId/complete` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/complete](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/complete) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Mark job complete with summary notes |
+| `GET` | `/api/v1/technician/jobs/:jobId/gate-pass` | [https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/gate-pass](https://bpm-backend-80wo.onrender.com/api/v1/technician/jobs/:jobId/gate-pass) | `TECHNICIAN`, `AGENCY_ADMIN`, `AGENCY_SUPERVISOR` | Fetch gate pass issued for technician entry |
+
+---
+
+### 4.8 Gate Passes & Visitor Management (`/api/v1/gate-passes`)
+
+| Method | Endpoint | Live Production URL | Roles Allowed | Description |
+|---|---|---|---|---|
+| `POST` | `/api/v1/gate-passes/requests` | [https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests](https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests) | Authenticated | Create visitor / guest / delivery gate pass request |
+| `GET` | `/api/v1/gate-passes/requests` | [https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests](https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests) | Authenticated | List all gate pass requests |
+| `GET` | `/api/v1/gate-passes/requests/:id` | [https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests/:id](https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests/:id) | Authenticated | Get gate pass request by ID |
+| `POST` | `/api/v1/gate-passes/requests/:id/approve` | [https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests/:id/approve](https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests/:id/approve) | `RESIDENT`, `SECURITY_ADMIN`, `AGENCY_ADMIN` | Approve request & generate active gate pass QR/OTP |
+| `POST` | `/api/v1/gate-passes/requests/:id/reject` | [https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests/:id/reject](https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/requests/:id/reject) | `RESIDENT`, `SECURITY_ADMIN`, `AGENCY_ADMIN` | Reject gate pass request |
+| `GET` | `/api/v1/gate-passes` | [https://bpm-backend-80wo.onrender.com/api/v1/gate-passes](https://bpm-backend-80wo.onrender.com/api/v1/gate-passes) | Authenticated | List issued gate passes |
+| `GET` | `/api/v1/gate-passes/:id` | [https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/:id](https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/:id) | Authenticated | Get gate pass by ID |
+| `POST` | `/api/v1/gate-passes/:id/revoke` | [https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/:id/revoke](https://bpm-backend-80wo.onrender.com/api/v1/gate-passes/:id/revoke) | `RESIDENT`, `SECURITY_ADMIN`, `AGENCY_ADMIN` | Revoke active gate pass |
+
+---
+
+### 4.9 Security & Guard Gate Access (`/api/v1/security`)
+
+| Method | Endpoint | Live Production URL | Roles Allowed | Description |
+|---|---|---|---|---|
+| `POST` | `/api/v1/security/access-requests` | [https://bpm-backend-80wo.onrender.com/api/v1/security/access-requests](https://bpm-backend-80wo.onrender.com/api/v1/security/access-requests) | `SECURITY_GUARD`, `SECURITY_ADMIN` | Guard registers walk-in visitor arrival |
+| `GET` | `/api/v1/security/access-requests/:id` | [https://bpm-backend-80wo.onrender.com/api/v1/security/access-requests/:id](https://bpm-backend-80wo.onrender.com/api/v1/security/access-requests/:id) | Authenticated | Guard checks visitor approval status |
+| `POST` | `/api/v1/security/gate-passes/verify` | [https://bpm-backend-80wo.onrender.com/api/v1/security/gate-passes/verify](https://bpm-backend-80wo.onrender.com/api/v1/security/gate-passes/verify) | `SECURITY_GUARD`, `SECURITY_ADMIN` | Guard scans QR token or validates OTP |
+| `POST` | `/api/v1/security/gate-passes/:id/check-in` | [https://bpm-backend-80wo.onrender.com/api/v1/security/gate-passes/:id/check-in](https://bpm-backend-80wo.onrender.com/api/v1/security/gate-passes/:id/check-in) | `SECURITY_GUARD`, `SECURITY_ADMIN` | Check-in visitor through security gate |
+| `POST` | `/api/v1/security/gate-passes/:id/check-out` | [https://bpm-backend-80wo.onrender.com/api/v1/security/gate-passes/:id/check-out](https://bpm-backend-80wo.onrender.com/api/v1/security/gate-passes/:id/check-out) | `SECURITY_GUARD`, `SECURITY_ADMIN` | Check-out visitor leaving property |
+| `POST` | `/api/v1/security/resident/access-requests/:id/decision` | [https://bpm-backend-80wo.onrender.com/api/v1/security/resident/access-requests/:id/decision](https://bpm-backend-80wo.onrender.com/api/v1/security/resident/access-requests/:id/decision) | `RESIDENT`, `AGENCY_ADMIN`, `SECURITY_ADMIN` | Resident approves or denies arrival request |
+
+---
+
+### 4.10 Quick Testing Examples with Live URL
+
+#### Check Service Status & Readiness:
+```bash
+curl -X GET "https://bpm-backend-80wo.onrender.com/health/ready"
+```
+
+#### User Login:
+```bash
+curl -X POST "https://bpm-backend-80wo.onrender.com/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@beeproperty.com", "password": "yourPasswordHere"}'
+```
+
+#### Verify Gate Pass:
+```bash
+curl -X POST "https://bpm-backend-80wo.onrender.com/api/v1/security/gate-passes/verify" \
+  -H "Authorization: Bearer <GUARD_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"otp": "482910"}'
+```
