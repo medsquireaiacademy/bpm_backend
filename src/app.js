@@ -16,8 +16,20 @@ const { sendSuccess } = require('./utils/response');
 const app = express();
 
 // Security and standard middlewares
-app.use(helmet());
-app.use(cors({ origin: CORS_ORIGIN }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false
+  })
+);
+app.use(
+  cors({
+    origin: CORS_ORIGIN === '*' ? '*' : CORS_ORIGIN,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-client-id', 'Idempotency-Key', 'Accept', 'Origin', 'X-Requested-With'],
+    exposedHeaders: ['x-request-id']
+  })
+);
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestContext);
